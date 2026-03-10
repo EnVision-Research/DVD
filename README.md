@@ -23,14 +23,14 @@ _**[Hongfei Zhang](https://x.com/hongfeizhang0xF)<sup>1*</sup>, [Harold H. Chen]
 
 
 
-## 👋Introduction
+## 👋 Introduction
 
 
-## 📢News
+## 📢 News
 
-## 🛠️Installation
+## 🛠️ Installation
 
-### Install from source code (Basic Dependency):
+### 📦 Install from source code (Basic Dependency):
 
 
 ```
@@ -41,18 +41,18 @@ conda activate dvd
 pip install -e .
 ```
 
-### Install SageAttention (For Speedup):
+### 🏃 Install SageAttention (For Speedup):
 ```
 pip install sageattention
 ```
-### Download the checkpoint from Huggingface
+### 🤗 Download the checkpoint from Huggingface
 
 ```
 mkdir ckpt
 cd ckpt 
 huggingface
 ```
-### Potential Issue (from [DiffSynth Studio](https://github.com/modelscope/DiffSynth-Studio))
+### 💅🏻 Potential Issue (from [DiffSynth Studio](https://github.com/modelscope/DiffSynth-Studio))
 
 If you encounter issues during installation, it may be caused by the packages we depend on. Please refer to the documentation of the package that caused the problem.
 
@@ -61,14 +61,14 @@ If you encounter issues during installation, it may be caused by the packages we
 * [cmake](https://cmake.org)
 * [cupy](https://docs.cupy.dev/en/stable/install.html)
 
-##  🕹️Inference
+## 🕹️ Inference
 
-###  For AIGC or Open World Evaluation (Stable Setting)
+### 🤹🏼‍♂️ For AIGC or Open World Evaluation (Stable Setting)
 ```
 bash infer_bash/openworld.sh
 ```
 
-### For Academic Purpose (Paper Setting)
+### 👩🏼‍🏫 For Academic Purpose (Paper Setting)
 
 
 ####  1. Video Inference
