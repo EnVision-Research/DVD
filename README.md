@@ -25,6 +25,22 @@ _**[Hongfei Zhang](https://x.com/hongfeizhang0xF)<sup>1*</sup>, [Harold H. Chen]
 
 ## 👋 Introduction
 
+Welcome to the official repository for **DVD: Deterministic Video Depth**! 
+
+While recent generative foundation models have shown remarkable potential in zero-shot depth estimation, they inherently suffer from the *ambiguity-hallucination dilemma* due to their stochastic sampling process. **DVD** fundamentally shifts this paradigm. We present the first deterministic framework that elegantly adapts pre-trained Video Diffusion Models (like WanV2.1) into single-pass depth regressors. 
+
+By cleanly stripping away generative stochasticity, DVD unites the semantic richness of generative foundation models with the structural stability of discriminative regressors.
+
+### ✨ Key Highlights
+
+* 🚀 **Extreme Data Efficiency:** DVD effectively unlocks profound generative priors using only **367K frames**—which is **163× less** task-specific training data than leading discriminative baselines like VDA (60M frames).
+* ⏱️ **Deterministic & Fast:** Bypasses iterative ODE integration. Inference is performed in a single forward pass, ensuring absolute temporal stability without generative hallucinations.
+* 📐 **Unparalleled Structural Fidelity:** Powered by our Latent Manifold Rectification (LMR), DVD achieves state-of-the-art high-frequency boundary precision (Boundary Recall & F1) compared to overly smoothed baselines.
+* 🎥 **Infinite Long-Video Inference:** Equipped with our training-free *Global Affine Coherence* module, DVD seamlessly stitches sliding windows to support unconstrained long-video rollouts (e.g., 1500+ frames) with zero scale drift.
+
+> **TL;DR:** If you want state-of-the-art video depth estimation that is highly detailed, temporally stable across long videos, and exceptionally data-efficient, **DVD** is what you need.
+
+---
 
 ## 📢 News
 
