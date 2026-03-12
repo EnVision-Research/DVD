@@ -133,6 +133,9 @@ bash infer_bash/openworld.sh
 
 You may also put more videos in the `demo/` directory and alter the video path in the bash to get more results!
 
+---
+
+
 ### 👩🏼‍🏫 For Academic Purpose (Paper Setting)
 
 
