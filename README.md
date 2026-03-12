@@ -94,7 +94,7 @@ pip install sageattention # DO NOT USE THIS FOR TRAINING!!!
 mkdir ckpt
 huggingface-cli login # Or hf auth login 
 ```
-####  2. Download the checkpoint
+####  2. Download the checkpoint from [huggingface repo](https://huggingface.co/FayeHongfeiZhang/DVD)
 
 ```
 huggingface-cli download FayeHongfeiZhang/DVD --revision main --local-dir ckpt
