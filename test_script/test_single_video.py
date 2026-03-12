@@ -48,6 +48,8 @@ def read_video(video_path):
     if not cap.isOpened():
         raise ValueError(f"Cannot open video: {video_path}")
 
+    fps = cap.get(cv2.CAP_PROP_FPS)
+
     frames = []
     while True:
         ret, frame = cap.read()
@@ -57,10 +59,12 @@ def read_video(video_path):
         frames.append(frame)
 
     cap.release()
+
     video_np = np.stack(frames)
     video_tensor = torch.from_numpy(
         video_np).permute(0, 3, 1, 2).float() / 255.0
-    return video_tensor.unsqueeze(0)  # [1, T, C, H, W]
+
+    return video_tensor.unsqueeze(0), fps   # [1, T, C, H, W], fps
 
 
 def resize_for_training_scale(video_tensor, target_h=480, target_w=640):
@@ -250,7 +254,7 @@ def main():
     yaml_args = OmegaConf.load(args.model_config)
 
     # Prepare Data
-    input_tensor = read_video(args.input_video)
+    input_tensor, origin_fps = read_video(args.input_video)
     print("Original shape:", input_tensor.shape)
 
     input_tensor, orig_size = resize_for_training_scale(
@@ -300,7 +304,7 @@ def main():
     d_min, d_max = depth.min(), depth.max()
     vis_depth = (depth - d_min) / (d_max - d_min + 1e-8)
     save_video(vis_depth, f"{out_prefix}_depth_vis.mp4",
-               fps=15, quality=6, grayscale=args.grayscale)
+               fps=origin_fps, quality=6, grayscale=args.grayscale)
 
     print("Inference completed successfully!")
 

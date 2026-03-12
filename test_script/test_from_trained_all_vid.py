@@ -264,10 +264,10 @@ if __name__ == "__main__":
     model = model.to('cuda')
 
     VIDEO_DATASET_CONFIGS = {
-        "vid_bonn": "configs/vid_config/vid_bonn.yaml",
+        # "vid_bonn": "configs/vid_config/vid_bonn.yaml",
         "vid_kitti": "configs/vid_config/vid_kitti.yaml",
-        "vid_sintel": "configs/vid_config/vid_sintel.yaml",
-        'vid_scannet': 'configs/vid_config/vid_scannet.yaml'
+        # "vid_sintel": "configs/vid_config/vid_sintel.yaml",
+        # 'vid_scannet': 'configs/vid_config/vid_scannet.yaml'
     }
 
     eval_metrics = [
@@ -339,10 +339,16 @@ if __name__ == "__main__":
                 input_rgb, input_depth, valid_mask, sample_idx = get_data(
                     batch, dataset.min_depth, dataset.max_depth, frame_setting['max_num_frame'])
                 print(f"input_rgb shape: {input_rgb.shape}")
-
+                import time 
+                torch.cuda.synchronize()
+                start_time = time.time()
+                
                 res_dict = generate_depth_sliced(
                     model, args, input_rgb, cli_args.window_size, cli_args.overlap)
-
+                torch.cuda.synchronize()
+                end_time = time.time()
+                print(f"Inference time (s): {(end_time - start_time):.6f}")
+                
                 overlap_mae_mean = res_dict.get("overlap_mae_mean", None)
                 if overlap_mae_mean is not None:
                     overall_overlap_mae_sum += float(overlap_mae_mean)

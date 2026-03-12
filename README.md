@@ -47,11 +47,28 @@ pip install sageattention
 ```
 ### 🤗 Download the checkpoint from Huggingface
 
+#### 1. Make dir and login to huggingface
 ```
 mkdir ckpt
-cd ckpt 
-huggingface
+huggingface-cli login
 ```
+####  2. Download the checkpoint
+
+```
+huggingface-cli download FayeHongfeiZhang/DVD --revision main --local-dir ckpt
+```
+
+#### 3. The final structure shoule be like
+```
+DVD
+├── ckpt/
+├──── model_config.yaml
+├──── model.safetensors
+├── configs/
+├── examples/
+├── ...
+```
+
 ### 💅🏻 Potential Issue (from [DiffSynth Studio](https://github.com/modelscope/DiffSynth-Studio))
 
 If you encounter issues during installation, it may be caused by the packages we depend on. Please refer to the documentation of the package that caused the problem.

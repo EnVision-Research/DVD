@@ -187,8 +187,8 @@ class Scannet_VID_Dataset(Dataset):
             for _ in range(1000):
                 _stride = random.choice(self.strides)
                 _num_frames = random.choice(self.num_frames)
-                if _num_frames % 4 != 1:
-                    continue
+                # if _num_frames % 4 != 1:
+                #     continue
                 _total_frames_req = _stride * (_num_frames - 1) + 1
                 if _total_frames_req > total_frames:
                     continue

@@ -273,9 +273,6 @@ class KITTI_VID_Dataset(Dataset):
             img_np = np.array(img_list).astype(np.float32) / 255.0
             depth_np = np.array(depth_list)
 
-            # print(f"img_np shape {img_np.shape}")
-            # print(f"depth_np shape {depth_np.shape}")
-            # Convert to torch tensors
             image = torch.from_numpy(img_np).permute(0, 3, 1, 2)
             depth = torch.from_numpy(depth_np).unsqueeze(
                 3).permute(0, 3, 1, 2).repeat(1, 3, 1, 1)
@@ -292,11 +289,10 @@ class KITTI_VID_Dataset(Dataset):
                 "eval_mask": valid_mask_tensor,
                 "scene_name": scene_name,
             }
-
             return sample
         except Exception as e:
             print(f"Error in __getitem__: {e}")
-            return None
+            return self.__getitem__(idx+1)
 
     def _get_valid_mask(self, depth: torch.Tensor):
         # reference: https://github.com/cleinc/bts/blob/master/pytorch/bts_eval.py
@@ -327,4 +323,3 @@ class KITTI_VID_Dataset(Dataset):
             # eval_mask.reshape(valid_mask.shape)
             valid_mask = torch.logical_and(valid_mask, eval_mask)
         return valid_mask
-

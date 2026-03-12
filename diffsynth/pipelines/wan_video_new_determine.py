@@ -1,5 +1,6 @@
 import glob
 import os
+import time
 import types
 import warnings
 from dataclasses import dataclass
@@ -280,7 +281,7 @@ class ModelConfig:
     offload_dtype: Optional[torch.dtype] = None
 
     def download_if_necessary(
-        self, local_model_path="./models", skip_download=True, use_usp=False
+        self, local_model_path="./models", skip_download=False, use_usp=False
     ):
         if self.path is None:
             # Check model_id and origin_file_pattern
@@ -373,7 +374,7 @@ class WanVideoPipeline(BasePipeline):
         self.text_encoder: WanTextEncoder = None
         self.image_encoder: WanImageEncoder = None
         # self.pose_encoder: CameraPoseEncoder = None
-        self.dit: WanMo = None
+        self.dit: WanModel = None
         self.vae: WanVideoVAE = None
         self.motion_controller: WanMotionControllerModel = None
         self.vace: VaceWanModel = None
@@ -396,13 +397,6 @@ class WanVideoPipeline(BasePipeline):
         ]
 
         self.model_fn = model_fn_wan_video
-
-    def load_lora(self, module, path, alpha=1):
-        loader = GeneralLoRALoader(
-            torch_dtype=self.torch_dtype, device=self.device)
-        lora = load_state_dict(
-            path, torch_dtype=self.torch_dtype, device=self.device)
-        loader.load(module, lora, alpha=alpha)
 
     def training_predict(self, decode, **inputs):
         # timestep_id = torch.randint(
@@ -437,12 +431,7 @@ class WanVideoPipeline(BasePipeline):
                 tiled=True,
                 tile_size=(30, 52),
                 tile_stride=(15, 26),
-                # tiled=tiled,
-                # tile_size=tile_size,
-                # tile_stride=tile_stride,
             )
-        # print(f"noise_pred: {noise_pred.shape}")
-        # print(f"target: {training_target.shape}")
         return {
             'rgb_gt': inputs['rgb_latents'],
             "depth_gt": training_target,
@@ -743,7 +732,7 @@ class WanVideoPipeline(BasePipeline):
         # Speed control
         motion_bucket_id: Optional[int] = None,
         # VAE tiling
-        tiled: Optional[bool] = True,
+        tiled: Optional[bool] = False,
         tile_size: Optional[tuple[int, int]] = (30, 52),
         tile_stride: Optional[tuple[int, int]] = (15, 26),
         # Sliding window
@@ -809,41 +798,25 @@ class WanVideoPipeline(BasePipeline):
             "extra_image_frame_index": extra_image_frame_index,
         }
         for unit in self.units:
-            # print(f"Handling unit: {unit.__class__.__name__}")
             inputs_shared, inputs_posi, inputs_nega = self.unit_runner(
                 unit, self, inputs_shared, inputs_posi, inputs_nega
             )
-        # inputs_shared['latents'] = torch.randn_like(inputs_shared['latents'])
-        # Denoise
+
         models = {name: getattr(self, name)
                   for name in self.in_iteration_models}
 
-        # for progress_id, timestep in enumerate(
-        #     progress_bar_cmd(self.scheduler.timesteps)
-        # ):
-        # print(f"Scheduler timestesp {self.scheduler.timesteps}")
         for timestep in self.scheduler.timesteps:
-            # beg_time = time.time()
             timestep = timestep.unsqueeze(0).to(
                 dtype=self.torch_dtype, device=self.device
             )
-            # print(f"timesteps {timestep}", end=' ')
-            # Inference
+            # torch.cuda.synchronize()
+            # start_time = time.time()
             noise_pred_posi = self.model_fn(
                 **models, **inputs_shared, **inputs_posi, timestep=timestep
             )
-            # if cfg_scale != 1.0:
-            #     if cfg_merge:
-            #         noise_pred_posi, noise_pred_nega = noise_pred_posi.chunk(2, dim=0)
-            #     else:
-            #         noise_pred_nega = self.model_fn(
-            #             **models, **inputs_shared, **inputs_nega, timestep=timestep
-            #         )
-            #     noise_pred = noise_pred_nega + cfg_scale * (
-            #         noise_pred_posi - noise_pred_nega
-            #     )
-            # else:
-            #     noise_pred = noise_pred_posi
+            # torch.cuda.synchronize()
+            # end_time = time.time()
+            # print(f"Model forward time: {end_time - start_time}")
             noise_pred = noise_pred_posi
 
             inputs_shared["latents"] = self.scheduler.step(
@@ -860,6 +833,8 @@ class WanVideoPipeline(BasePipeline):
         if vace_reference_image is not None:
             inputs_shared["latents"] = inputs_shared["latents"][:, :, 1:]
 
+        # torch.cuda.synchronize()
+        # start_time = time.time()
         depth_video = self.vae.decode(
             depth,
             device=self.device,
@@ -867,6 +842,9 @@ class WanVideoPipeline(BasePipeline):
             tile_size=tile_size,
             tile_stride=tile_stride,
         )
+        # torch.cuda.synchronize()
+        # end_time = time.time()
+        # print(f"VAE decoding time: {end_time - start_time}")
         depth_video = self.vae_output_to_video(depth_video)
         rgb_video = None
         if rgb is not None:
@@ -1003,7 +981,7 @@ class WanVideoUnit_NoiseInitializer(PipelineUnit):
         rand_device,
         vace_reference_image,
     ):
-        print(f"num frames {num_frames}")
+        # print(f"num frames {num_frames}")
         length = (num_frames - 1) // 4 + 1
         if vace_reference_image is not None:
             length += 1
@@ -1013,7 +991,7 @@ class WanVideoUnit_NoiseInitializer(PipelineUnit):
             seed=seed,
             rand_device=rand_device,
         )
-        print(f"Noise shape {noise.shape} ")
+        # print(f"Noise shape {noise.shape} ")
 
         return {"noise": noise, "latents": noise}
 
@@ -1061,7 +1039,7 @@ class WanVideoUnit_InputVideoEmbedder(PipelineUnit):  # For training only
         assert mode in ['generation',
                         'regression'], f"mode {mode} is not supported"
         length = (num_frames - 1) // 4 + 1
-        # inference part
+        # inference part        
         if not pipe.scheduler.training:
             if mode == 'generation':
                 # only need noise
@@ -1078,6 +1056,7 @@ class WanVideoUnit_InputVideoEmbedder(PipelineUnit):  # For training only
                     _preprocessed_video = pipe.preprocess_video(_input_video)
                     video_list.append(_preprocessed_video)
                 videos_tensor = torch.cat(video_list, dim=0)
+                # print(f"videos_tensor shape: {videos_tensor.shape}")
                 input_rgb_latents = pipe.vae.encode(
                     videos_tensor,
                     device=pipe.device,
@@ -1085,9 +1064,8 @@ class WanVideoUnit_InputVideoEmbedder(PipelineUnit):  # For training only
                     tile_size=tile_size,
                     tile_stride=tile_stride,
                 ).to(dtype=pipe.torch_dtype, device=pipe.device)
-                # del videos_tensor
                 return {"latents": input_rgb_latents}
-
+        
         disp_list = []
         for _input_disp in input_disp:
             _preprocessed_disp = pipe.preprocess_video(_input_disp)
@@ -1100,8 +1078,7 @@ class WanVideoUnit_InputVideoEmbedder(PipelineUnit):  # For training only
             tile_size=tile_size,
             tile_stride=tile_stride,
         ).to(dtype=pipe.torch_dtype, device=pipe.device)
-        # del input_disp
-
+        
         # Training
         if mode == 'generation':
             # need noise + depth
@@ -1130,7 +1107,6 @@ class WanVideoUnit_InputVideoEmbedder(PipelineUnit):  # For training only
                 "rgb_latents": input_rgb_latents,
                 "depth_latents": input_disp_latents,
             }
-
 
 
 class WanVideoUnit_PromptEmbedder(PipelineUnit):
@@ -1218,8 +1194,8 @@ class WanVideoUnit_ImageEmbedder(PipelineUnit):
             batch_size, num_frames, height // 8, width // 8, device=pipe.device
         )
 
-        print(
-            f"tiled, tile size, tile stride: {tiled}, {tile_size}, {tile_stride}")
+        # print(
+        #     f"tiled, tile size, tile stride: {tiled}, {tile_size}, {tile_stride}")
         # Assmue that one must have a input image
         vae_input = torch.concat(
             [
@@ -1254,10 +1230,6 @@ class WanVideoUnit_ImageEmbedder(PipelineUnit):
             )  # B F H W
 
             msk = msk * mask
-            # print(
-            #     f"msk shape after extra images: {msk.shape}, msk mean on B F channel {torch.mean(msk, dim=(2, 3))}")
-            # print(
-            #     f"vae input mean on B F channel {torch.mean(vae_input, dim=(2, 3))}")
         else:
             msk[:, 1:] = 0
 
@@ -1268,15 +1240,7 @@ class WanVideoUnit_ImageEmbedder(PipelineUnit):
             batch_size, msk.shape[1] // 4, 4, height // 8, width // 8
         )  # B F C(4) H W
         msk = msk.transpose(1, 2)
-        # print(
-        #     f"Mask shape: {msk.shape}, msk mean on B F channel {torch.mean(msk, dim=(1,3, 4))}")
         vae_input = vae_input.permute(0, 2, 1, 3, 4).contiguous()  # B C F H W
-        # print(
-        #     f"before VAE encode, vae_input shape: {vae_input.shape}, msk shape: {msk.shape}"
-        # )
-        # print(
-        #     f"vae shape: {vae_input.shape}, msk shape: {msk.shape}, "
-        # )
         y = pipe.vae.encode(
             vae_input.to(dtype=pipe.torch_dtype, device=pipe.device),
             device=pipe.device,
@@ -1620,7 +1584,6 @@ class TemporalTiler_BCTHW:
         return value
 
 
-
 def model_fn_wan_video(
     dit: WanModel,
     motion_controller: WanMotionControllerModel = None,
@@ -1643,10 +1606,6 @@ def model_fn_wan_video(
     use_gradient_checkpointing_offload: bool = False,
     **kwargs,
 ):
-    # print(f"Using use_gradient_checkpointing: {use_gradient_checkpointing}")
-    # print(
-    #     f"Using use_gradient_checkpointing_offload: {use_gradient_checkpointing_offload}")
-    # print(f"x,y shape: {latents.shape}, {y.shape if y is not None else None}")
     if sliding_window_size is not None and sliding_window_stride is not None:
         model_kwargs = dict(
             dit=dit,
@@ -1792,4 +1751,6 @@ def model_fn_wan_video(
         f -= 1
 
     latents = dit.unpatchify(latents, (f, h, w))
+    return latents
+    return latents
     return latents

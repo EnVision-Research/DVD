@@ -64,7 +64,7 @@ class FlowMatchScheduler:
 
         ts_val = self.num_train_timesteps * denoise_step
         sigma_val = ts_val / self.num_train_timesteps
-        weight_val = 1.0
+        weight_val = 1.795
 
         # Create tensors with a single value
         self.timesteps = torch.tensor([ts_val], dtype=torch.float32)

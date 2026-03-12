@@ -122,23 +122,7 @@ class WanTrainingModule(DiffusionTrainingModule):
         accelerator.print(
             f"Total trainable parameters: {sum(p.numel() for p in self.trainable_modules())}")
 
-    def set_vae_state(self):
-        args = self.args
-        # Set decode grad if needed
-        if args.get('decode_depth', False):
-            for name, model in self.pipe.named_children():
-                # print(f"Model name: {name}")
-                if 'vae' in name:
-                    # print(f"Model name: {name}")
-                    print(
-                        f"Unfreezing model {name} for depth decoding backward")
-                    model.eval()
-                    model.requires_grad_(True)
-
     def forward_preprocess(self, data):
-        # CFG-sensitive parameters
-
-        # CFG-unsensitive parameters
         inputs_shared = {
             # Assume you are using this pipeline for inference,
             # please fill in the input parameters.
@@ -240,7 +224,7 @@ class Validation():
             input_data["frame"] = input_rgb.shape[1]
             input_data["batch_size"] = input_rgb.shape[0]
             input_data["height"], input_data["width"] = input_rgb.shape[-2:]
-
+            # print(f"input rgb shape {input_rgb.shape}")
             videos = pipe(
                 prompt=[""] * input_data["batch_size"],
                 negative_prompt=[""] * input_data["batch_size"],
@@ -257,7 +241,7 @@ class Validation():
                 denoise_step=args.denoise_step,
                 cfg_scale=1,
                 seed=0,
-                tiled=True,
+                tiled=False,
                 num_inference_steps=args.validation_scheduler_timesteps,
             )
 
@@ -265,7 +249,7 @@ class Validation():
 
         def get_data(batch, dataset_min, dataset_max):
             '''
-            This functino is to adapt for the older version of dataset format proposed by Ke et al.
+            This function is to adapt for the older version of dataset format proposed by Marigold (Ke et al).
             '''
             rgb, depth, valid_mask, sample_id = None, None, None, None
             if 'rgb_int' in batch.keys():
@@ -323,35 +307,17 @@ class Validation():
                 os.makedirs(os.path.join(save_dir, _dir), exist_ok=True)
 
             for idx, batch in enumerate(tqdm(test_dataloader)):
-
+                if idx > 1:
+                    break
                 with torch.no_grad():
                     input_rgb, input_depth, valid_mask, sample_idx = get_data(
                         batch, _dataset_min, _dataset_max)
 
-                    # input_rgb = batch["images"].to(accelerator.device)
-                    # input_rgb = get_data(batch).to(accelerator.device)
-                    # input_depth = batch["disparity"].to(
-                    #     accelerator.device)  # B T 3 H W
-                    # sample_idx = batch["sample_idx"]
-                    # valid_mask = batch.get(
-                    #     "eval_mask", torch.ones(input_rgb.shape))
-                    # _range_mask = torch.logical_and((input_depth > _dataset_min), (
-                    #     input_depth < _dataset_max)).bool()
-                    # print(
-                    #     f"Sample {idx} _range mask mean {_range_mask.float().mean()}")
-                    # print(
-                    #     f"valid and range mask shape {valid_mask.shape}, {_range_mask.shape}")
-                    # valid_mask = valid_mask.to(accelerator.device)
-                    # _range_mask = _range_mask.to(accelerator.device)
-
-                    # if input_rgb.ndim == 4:  # this is a image dataset
-                    #     input_rgb = input_rgb.unsqueeze(1)
-                    #     input_depth = input_depth.unsqueeze(1)
-                    #     valid_mask = valid_mask.unsqueeze(1)
-
                     # valid_mask = torch.logical_and(valid_mask, _range_mask)
                     res_dict = generate_depth(input_rgb)
                     pred_depth = res_dict.get("depth")
+                    # print(
+                    #     f"Pred_depth shape {pred_depth.shape}, range{pred_depth.min()}, {pred_depth.max()}")
                     pred_rgb = res_dict.get('rgb', None)
 
                     _input_depth = (
@@ -410,14 +376,9 @@ class Validation():
                         }
 
                         for k, v in SAVE_DICT.items():
-                            # print(f"Processing {k}")
                             if v is not None:
                                 save_path = os.path.join(
                                     save_dir, k, f"{save_idx:05d}.mp4")
-                                # save_video_ffmpeg(v, save_path, fps=5)
-                                # submit async save task
-                                # save_executor.submit(
-                                #     async_save_video, v, save_path, 5, 10)
                                 save_video(
                                     v,
                                     save_path,

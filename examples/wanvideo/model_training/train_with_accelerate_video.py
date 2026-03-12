@@ -116,9 +116,7 @@ def launch_training_task(
         )
 
         model.pipe.scheduler.set_timesteps(
-            num_inference_steps=args.training_scheduler_timesteps,
             training=True,
-            schedule_mode=args.training_schedule_mode,
             denoise_step=args.denoise_step,
         )
         model.pipe.dit.train()
@@ -135,9 +133,6 @@ def launch_training_task(
                         for _train_dataloader in train_dataloader_list]
     prob = args.get('prob', [1 for _ in range(len(train_dataloader_list))])
     grad_loss = GradientLoss3DSeparate()
-
-    # print(f"GPU get loader iter list  {len(loader_iter_list)}")
-    # 生成区间 [(0,2), (2,5), (5,10)]
 
     pick_ranges = []
     start = 0
@@ -201,8 +196,6 @@ def launch_training_task(
 
                 # Update optimizer and scheduler
                 if accelerator.sync_gradients:
-                    # accelerator.print(
-                    #     f"Step at small batch step {small_batch_step}, global step {global_step}")
                     if args.get('clip_grad_norm', True):
                         accelerator.clip_grad_norm_(
                             model.trainable_modules(), max_norm=1.0)
@@ -221,7 +214,6 @@ def launch_training_task(
                         print(
                             f"GPU {rank} step {global_step}: depth loss = {accumulate_depth_loss}, grad_loss = {accumulate_grad_loss}, learning rate : {scheduler.get_last_lr()[0]:.8f}"
                         )
-                        # accelerator.print(torch.cuda.memory_summary())
                         accumulate_depth_loss = 0.0
                         accumulate_grad_loss = 0.0
                         acm_cnt = 0
@@ -315,8 +307,6 @@ if __name__ == "__main__":
         model.trainable_modules(), lr=args.learning_rate)
     world_size = accelerator.num_processes
 
-    model.set_vae_state()
-
     if args.warmup_steps > 0:
         scheduler = torch.optim.lr_scheduler.LinearLR(
             optimizer, start_factor=0.5, total_iters=args.warmup_steps*world_size
@@ -389,6 +379,7 @@ if __name__ == "__main__":
     # Enlarge the video dataset
     ttr_vid_train_dataset.data_list = ttr_vid_train_dataset.data_list * 100
     vikitt_vid_train_dataset.data_list = vikitt_vid_train_dataset.data_list * 100
+    
     accelerator.print(
         f"Enlarged length of ttr and vkitti: {len(ttr_vid_train_dataset)}, {len(vikitt_vid_train_dataset)}")
 
@@ -473,23 +464,6 @@ if __name__ == "__main__":
             model, optimizer, scheduler, hypersim_train_dataloader, vkitti_train_dataloader, ttr_vid_train_dataloader, vkitti_vid_train_dataloader, kitti_vid_test_dataloader, scannet_vid_test_dataloader, nyuv2_test_dataloader
         )
     )
-    # model, optimizer, scheduler, hypersim_train_dataloader, vkitti_train_dataloader, ttr_vid_train_dataloader, vkitti_vid_train_dataloader = (
-    #     accelerator.prepare(
-    #         model, optimizer, scheduler, hypersim_train_dataloader, vkitti_train_dataloader, ttr_vid_train_dataloader, vkitti_vid_train_dataloader
-    #     )
-    # )
-
-    if os.path.exists(args.image_state_dir):
-        _state_dir = args.image_state_dir
-        unwrapped_model = accelerator.unwrap_model(model)
-        ckpt_path = os.path.join(_state_dir, "model.safetensors")
-        state_dict = load_file(ckpt_path, device="cpu")
-        missing, unexpected = unwrapped_model.load_state_dict(
-            state_dict, strict=False)
-        assert len(unexpected) == 0
-        accelerator.print(f"Missing keys {missing}")
-
-        # print(f"Unexpected keys {unexpected}")
 
     if args.resume and args.training_state_dir is not None:
 

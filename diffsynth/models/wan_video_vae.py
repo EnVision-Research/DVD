@@ -1,8 +1,7 @@
-from einops import rearrange, repeat
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from einops import rearrange, repeat
 from tqdm import tqdm
 
 CACHE_T = 2
@@ -679,6 +678,7 @@ class WanVideoVAE(nn.Module):
             target_h = h * self.upsampling_factor
             target_w = w * self.upsampling_factor
             import pdb
+
             # pdb.set_trace()
             values[
                 :,
@@ -767,7 +767,7 @@ class WanVideoVAE(nn.Module):
 
     def encode(self, videos, device, tiled=False, tile_size=(34, 34), tile_stride=(18, 16)):
 
-        videos = [video.to("cpu") for video in videos]
+        # videos = [video.to("cpu") for video in videos]
         hidden_states = []
         for video in videos:
             video = video.unsqueeze(0)
@@ -781,6 +781,12 @@ class WanVideoVAE(nn.Module):
             hidden_state = hidden_state.squeeze(0)
             hidden_states.append(hidden_state)
         hidden_states = torch.stack(hidden_states)
+        # TODO
+        # if tiled:
+        #     hidden_states = self.tiled_encode(
+        #         videos, device, tile_size, tile_stride)
+        # else:
+        #     hidden_states = self.single_encode(videos, device)
         return hidden_states
 
     def decode(self, hidden_states, device, tiled=False, tile_size=(34, 34), tile_stride=(18, 16)):

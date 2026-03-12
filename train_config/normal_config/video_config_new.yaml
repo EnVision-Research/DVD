@@ -1,17 +1,17 @@
 # model:
 model_id_with_origin_paths: "Wan-AI/Wan2.1-T2V-1.3B:diffusion_pytorch_model*.safetensors,Wan-AI/Wan2.1-T2V-1.3B:Wan2.1_VAE.pth"
-# Trainable models
+
+# Models
 trainable_models: "dit"
 remove_prefix_in_ckpt: "pipe.dit"
 mode: regression
-denoise_step: 0.5 # [0.2, 0.5, 0.8]
+denoise_step: 0.5 
 training_target: "x"
 
-# Dumb setting 
 lora_base_model: "dit"
-# lora_base_model: null
 lora_rank: 512
 
+# Loss
 grad_loss: true
 grad_co: 0.5
 use_latent_flow: true
@@ -19,16 +19,15 @@ use_latent_flow: true
 # Load and save
 resume: false
 training_state_dir: "na"
-load_optimizer: true
-output_path: "/hpc2hdd/home/hongfeizhang/experiments/Videpth/Debug/githubtest"
-image_state_dir: 'na'
+load_optimizer: false
+output_path: "/hpc2hdd/home/hongfeizhang/experiments/Videpth/Debug/githubtest_1"
 global_step: 0
 
 # train:
 num_epochs: 1000000
 gradient_accumulation_steps: 4
-validate_step: 25
-init_validate: false
+validate_step: 500
+init_validate: true
 
 # Hyperparam:
 clip_grad_norm: true
@@ -49,12 +48,12 @@ dataloader_num_workers: 4
 train_ratio: 1
 
 # 2 : 6 
-prob: [0, 0, 40, 10]
+prob: [9, 1, 40, 10]
 batch_size: 8
 
 # Image
 # hypersim_dataset:
-train_data_dir_hypersim: "/data/user/cliao127/dataset/hypersim_filtered"
+train_data_dir_hypersim: "/hpc2hdd/JH_DATA/share/jhe812/PrivateShareGroup/jhe812_d4p_datasets/d4p_datasets/hypersim_filtered"
 resolution_hypersim: [480, 640]
 random_flip: true
 norm_type: "trunc_disparity"
@@ -62,7 +61,7 @@ truncnorm_min: 0.02
 align_cam_normal: false
 
 # vkitti
-train_data_dir_vkitti: '/data/user/cliao127/dataset/vkitti'
+train_data_dir_vkitti: '/hpc2hdd/JH_DATA/share/jhe812/PrivateShareGroup/jhe812_d4p_datasets/d4p_datasets/vkitti'
 
 # Video
 max_num_frame: 45
@@ -70,8 +69,8 @@ min_num_frame: 45
 max_sample_stride: 1
 min_sample_stride: 1
 
-train_data_dir_ttr_vid: "/data/user/cliao127/dataset/ttr"
-train_data_dir_vkitti_vid: '/data/user/cliao127/dataset/vkitti'
+train_data_dir_ttr_vid: "/hpc2hdd/home/hongfeizhang/dataset/ttr"
+train_data_dir_vkitti_vid: '/hpc2hdd/JH_DATA/share/jhe812/PrivateShareGroup/jhe812_d4p_datasets/d4p_datasets/vkitti'
 
 # test_set
 test_batch_size: 1
@@ -80,10 +79,10 @@ test_min_num_frame: 45
 test_max_sample_stride: 1
 test_min_sample_stride: 1
 
-kitti_vid_test_data_root: "/data/user/cliao127/dataset/kitti_depth"
-scannet_vid_test_data_root: '/data/user/cliao127/dataset/scannet'
+kitti_vid_test_data_root: "/hpc2hdd/home/hongfeizhang/dataset/kitti_depth"
+scannet_vid_test_data_root: '/hpc2hdd/home/hongfeizhang/dataset/scannet'
 scannet_split_ls: 'configs/scannetv1_test.txt'
-nyuv2_test_data_root: '/data/user/cliao127/dataset/nyu_v2'
+nyuv2_test_data_root: '/hpc2hdd/home/hongfeizhang/dataset/nyu_v2'
 
 # Unique setting
 scheduler_training_weight_type: "equal" # late, equal, default

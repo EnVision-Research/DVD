@@ -1,7 +1,7 @@
 compute_environment: LOCAL_MACHINE
 debug: false
 
-distributed_type: DEEPSPEED
+distributed_type: 'MULTI_GPU'
 num_processes: 4
 num_machines: 1
 machine_rank: 0
