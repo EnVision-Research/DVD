@@ -180,7 +180,7 @@ def launch_training_task(
                 
                 loss = torch.nn.functional.mse_loss(
                     depth_gt, pred_depth)
-                print(f"Depth gt range: {depth_gt.min()}, {depth_gt.max()}, pred depth range: {pred_depth.min()}, {pred_depth.max()}")
+                
                 
                 accumulate_depth_loss += loss.item()
 

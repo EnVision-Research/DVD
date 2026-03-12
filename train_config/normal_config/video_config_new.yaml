@@ -26,14 +26,14 @@ global_step: 0
 # train:
 num_epochs: 1000000
 gradient_accumulation_steps: 4
-validate_step: 500
+validate_step: 100
 init_validate: true
 
 # Hyperparam:
 clip_grad_norm: true
 learning_rate: 1e-4
 use_gradient_checkpointing: true
-log_step: 100
+log_step: 10
 no_extra_frame: true
 warmup_steps: 0
 mixed_precision: "bf16"

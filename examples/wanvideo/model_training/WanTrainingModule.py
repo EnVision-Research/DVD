@@ -63,9 +63,6 @@ class WanTrainingModule(DiffusionTrainingModule):
             training=True,
             denoise_step=args.denoise_step,
         )
-        self.pipe.scheduler.set_training_target(args.training_target)
-        self.pipe.scheduler.set_training_weight(
-            args.scheduler_training_weight_type)
         accelerator.print(f"Denoise step: {args.denoise_step}")
         accelerator.print("Timesteps:", self.pipe.scheduler.timesteps)
         accelerator.print(

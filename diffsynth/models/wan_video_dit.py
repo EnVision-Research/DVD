@@ -28,6 +28,7 @@ try:
     from sageattention import sageattn
 
     SAGE_ATTN_AVAILABLE = True
+    print(f"========= Using sage attention, please note that this is for inference speed up only!==========")
 except ModuleNotFoundError:
     SAGE_ATTN_AVAILABLE = False
 
