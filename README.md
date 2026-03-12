@@ -5,7 +5,7 @@ _**[Hongfei Zhang](https://x.com/hongfeizhang0xF)<sup>1*</sup>, [Harold H. Chen]
 <br>
 [Kanghao Chen](https://khao123.github.io/)<sup>1</sup>, [Bin Ren](https://amazingren.github.io/)<sup>5</sup>, [Xu Zheng](https://zhengxujosh.github.io/)<sup>1</sup>, [Shuai Yang](https://andysonys.github.io/)<sup>1</sup>, [Kun Zhou](https://redrock303.github.io/)<sup>6</sup>, [Yinchuan Li](https://scholar.google.com/citations?user=M6YfuCTSaKsC&hl=en)<sup>7</sup>, [Nicu Sebe](https://disi.unitn.it/~sebe/)<sup>8</sup>,
 <br>
-[Ying-Cong Chen](https://www.yingcong.me/)<sup>1,2†</sup>,**_
+[Ying-Cong Chen](https://www.yingcong.me/)<sup>1,2†</sup>**_
 <br><br>
 <sup>*</sup>Equal Contribution; <sup>†</sup>Corresponding Author
 <br>
@@ -43,6 +43,32 @@ By cleanly stripping away generative stochasticity, DVD unites the semantic rich
 ---
 
 ## 📢 News
+
+
+
+## 📂 Core Folders & Files Overview
+
+To help you navigate the codebase quickly, we have divided the core directories into two main categories based on what you want to do: **Inference** (just using the model) or **Training** (fine-tuning or training from scratch).
+
+### 🎬 For Inference (Testing & Using the Model)
+If you just want to generate depth maps from your own videos or reproduce our paper's results, focus on these folders:
+
+* **`infer_bash/` (The Launchpad):** Ready-to-use shell scripts (e.g., `openworld.sh`). This is the easiest way to run the model on your data without writing any code.
+* **`ckpt/` (The Vault):** This is where you should place our pre-trained model weights downloaded from Huggingface.
+* **`inference_results/` (The Output Bin):** Once you run an inference script, your generated depth maps and visualizer videos will appear here.
+* **`demo/` :** Quick-start examples and sample inputs to help you verify that your environment is set up correctly.
+
+### 🏋️‍♂️ For Training (Fine-tuning & Development)
+If you want to train DVD on your own datasets or modify the architecture, these are your go-to folders:
+
+* **`train_config/` (The Control Center):** YAML configuration files. You can easily tweak hyperparameters (like learning rate, batch size) and dataset paths here.
+* **`train_script/` (The Engine):** Contains the training bash.
+* **`diffsynth/pipelines/wan_video_new_determine.py` (The Brain):** The core DVD model architecture. If you want to understand or modify how we stripped away the generative noise to build the deterministic forward pass, look here.
+* **`infer_bash/` & `test_script/` (The Evaluator):** Scripts used to evaluate your newly trained checkpoints against standard benchmarks during or after training.
+* **`examples/dataset/`:** Codes of dataset construction.
+
+---
+
 
 ## 🛠️ Installation
 
@@ -94,12 +120,18 @@ If you encounter issues during installation, it may be caused by the packages we
 * [cmake](https://cmake.org)
 * [cupy](https://docs.cupy.dev/en/stable/install.html)
 
+---
+
+
 ## 🕹️ Inference
 
 ### 🤹🏼‍♂️ For AIGC or Open World Evaluation (Stable Setting)
+
 ```
 bash infer_bash/openworld.sh
 ```
+
+You may also put more videos in the `demo/` directory and alter the video path in the bash to get more results!
 
 ### 👩🏼‍🏫 For Academic Purpose (Paper Setting)
 
@@ -145,11 +177,19 @@ Reconfig the bash (**$IMAGE_BASE_DATA_DIR**) and run the image inference script
 bash infer_bash/image.sh
 ```
 
+---
+
+
 ## 🔥Training 
 
 #### Please refer to this [document](train_script/train.MD) for details on training.
 
-## Reference
+## 👏 Acknowledgement
+
+We sincerely thank the authors of [Depth Anything](https://github.com/DepthAnything/Depth-Anything-V2) and [RollingDepth](https://github.com/prs-eth/RollingDepth) for providing their implementing details. We would also thanks the contributors of [DiffSynth](https://github.com/modelscope/DiffSynth-Studio) where we borrow codes from.
+
+
+## 👾 Reference
 
 If you find our work useful in your research, please consider citing:
 ```bib
