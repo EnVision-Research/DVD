@@ -45,7 +45,7 @@ By cleanly stripping away generative stochasticity, DVD unites the semantic rich
 ---
 
 ## 📢 News
-- **[2026.03.13]** 🤗 Hugging Face Gradio demo ([Online](https://huggingface.co/spaces/haodongli/DVD) and [Local](https://github.com/EnVision-Research/DVD?tab=readme-ov-file#-gradio-demo)) released.
+- **[2026.03.13]** 🤗 Hugging Face Gradio demos ([Online](https://huggingface.co/spaces/haodongli/DVD) and [Local](https://github.com/EnVision-Research/DVD?tab=readme-ov-file#-gradio-demo)) released.
 - **[2026.03.13]** 📄 Paper is available on [arXiv](https://arxiv.org/abs/2603.12250).
 - **[2026.03.12]** 🌐 [Project page](https://dvd-project.github.io/) is live.
 - **[2026.03.11]** 🤗 Pre-trained weights released on [Hugging Face](https://huggingface.co/FayeHongfeiZhang/DVD/tree/main).
