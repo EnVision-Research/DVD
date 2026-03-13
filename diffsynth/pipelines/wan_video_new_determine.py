@@ -195,7 +195,9 @@ class BasePipeline(torch.nn.Module):
         #     )
         return video
 
-    def load_models_to_device(self, model_names=[]):
+    def load_models_to_device(self, model_names=None):
+        if model_names is None:
+            model_names = []
         if self.vram_management_enabled:
             # offload models
             for name, model in self.named_children():
@@ -590,7 +592,7 @@ class WanVideoPipeline(BasePipeline):
     def from_pretrained(
         torch_dtype: torch.dtype = torch.bfloat16,
         device: Union[str, torch.device] = "cuda",
-        model_configs: list[ModelConfig] = [],
+        model_configs: list[ModelConfig] = None,
         tokenizer_config: ModelConfig = ModelConfig(
             model_id="Wan-AI/Wan2.1-T2V-1.3B", origin_file_pattern="google/*"
         ),
@@ -600,6 +602,8 @@ class WanVideoPipeline(BasePipeline):
         use_usp=False,
     ):
         # Redirect model path
+        if model_configs is None:
+            model_configs = []
         if redirect_common_files:
             redirect_dict = {
                 "models_t5_umt5-xxl-enc-bf16.pth": "Wan-AI/Wan2.1-T2V-1.3B",
