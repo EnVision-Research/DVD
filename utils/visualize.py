@@ -27,9 +27,11 @@ def tensor_to_numpy(tensor_in):
 
 # def unnormalize(img_in, img_stats={'mean': [0.485, 0.456, 0.406], 
 #                                     'std': [0.229, 0.224, 0.225]}):
-def unnormalize(img_in, img_stats={'mean': [0.5,0.5,0.5], 'std': [0.5,0.5,0.5]}):
+def unnormalize(img_in, img_stats=None):
     """ unnormalize input image
     """
+    if img_stats is None:
+        img_stats = {}
     if torch.is_tensor(img_in):
         img_in = tensor_to_numpy(img_in)
 

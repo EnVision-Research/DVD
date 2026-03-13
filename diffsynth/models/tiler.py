@@ -196,9 +196,11 @@ class TileWorker2Dto3D:
         tile_size, tile_stride,
         tile_device="cpu", tile_dtype=torch.float32,
         computation_device="cuda", computation_dtype=torch.float32,
-        border_width=None, scales=[1, 1, 1, 1],
+        border_width=None, scales=None,
         progress_bar=lambda x:x
     ):
+        if scales is None:
+            scales = []
         B, C, T, H, W = model_input.shape
         scale_C, scale_T, scale_H, scale_W = scales
         tile_size_H, tile_size_W = tile_size

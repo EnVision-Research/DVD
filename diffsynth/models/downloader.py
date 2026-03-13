@@ -59,8 +59,10 @@ def download_customized_models(
     model_id,
     origin_file_path,
     local_dir,
-    downloading_priority: List[Preset_model_website] = ["ModelScope", "HuggingFace"],
+    downloading_priority: List[Preset_model_website] = None,
 ):
+    if downloading_priority is None:
+        downloading_priority = []
     downloaded_files = []
     for website in downloading_priority:
         # Check if the file is downloaded.
@@ -75,9 +77,13 @@ def download_customized_models(
 
 
 def download_models(
-    model_id_list: List[Preset_model_id] = [],
-    downloading_priority: List[Preset_model_website] = ["ModelScope", "HuggingFace"],
+    model_id_list: List[Preset_model_id] = None,
+    downloading_priority: List[Preset_model_website] = None,
 ):
+    if model_id_list is None:
+        model_id_list = []
+    if downloading_priority is None:
+        downloading_priority = []
     print(f"Downloading models: {model_id_list}")
     downloaded_files = []
     load_files = []

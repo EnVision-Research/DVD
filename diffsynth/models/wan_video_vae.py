@@ -116,7 +116,9 @@ class Resample(nn.Module):
         else:
             self.resample = nn.Identity()
 
-    def forward(self, x, feat_cache=None, feat_idx=[0]):
+    def forward(self, x, feat_cache=None, feat_idx=None):
+        if feat_idx is None:
+            feat_idx = []
         b, c, t, h, w = x.size()
         if self.mode == 'upsample3d':
             if feat_cache is not None:
@@ -210,7 +212,9 @@ class ResidualBlock(nn.Module):
         self.shortcut = CausalConv3d(in_dim, out_dim, 1) \
             if in_dim != out_dim else nn.Identity()
 
-    def forward(self, x, feat_cache=None, feat_idx=[0]):
+    def forward(self, x, feat_cache=None, feat_idx=None):
+        if feat_idx is None:
+            feat_idx = []
         h = self.shortcut(x)
         for layer in self.residual:
             if check_is_instance(layer, CausalConv3d) and feat_cache is not None:
@@ -277,11 +281,17 @@ class Encoder3d(nn.Module):
     def __init__(self,
                  dim=128,
                  z_dim=4,
-                 dim_mult=[1, 2, 4, 4],
+                 dim_mult=None,
                  num_res_blocks=2,
-                 attn_scales=[],
-                 temperal_downsample=[True, True, False],
+                 attn_scales=None,
+                 temperal_downsample=None,
                  dropout=0.0):
+        if dim_mult is None:
+            dim_mult = []
+        if attn_scales is None:
+            attn_scales = []
+        if temperal_downsample is None:
+            temperal_downsample = []
         super().__init__()
         self.dim = dim
         self.z_dim = z_dim
@@ -324,7 +334,9 @@ class Encoder3d(nn.Module):
         self.head = nn.Sequential(RMS_norm(out_dim, images=False), nn.SiLU(),
                                   CausalConv3d(out_dim, z_dim, 3, padding=1))
 
-    def forward(self, x, feat_cache=None, feat_idx=[0]):
+    def forward(self, x, feat_cache=None, feat_idx=None):
+        if feat_idx is None:
+            feat_idx = []
         if feat_cache is not None:
             idx = feat_idx[0]
             cache_x = x[:, :, -CACHE_T:, :, :].clone()
@@ -380,11 +392,17 @@ class Decoder3d(nn.Module):
     def __init__(self,
                  dim=128,
                  z_dim=4,
-                 dim_mult=[1, 2, 4, 4],
+                 dim_mult=None,
                  num_res_blocks=2,
-                 attn_scales=[],
-                 temperal_upsample=[False, True, True],
+                 attn_scales=None,
+                 temperal_upsample=None,
                  dropout=0.0):
+        if dim_mult is None:
+            dim_mult = []
+        if attn_scales is None:
+            attn_scales = []
+        if temperal_upsample is None:
+            temperal_upsample = []
         super().__init__()
         self.dim = dim
         self.z_dim = z_dim
@@ -428,8 +446,10 @@ class Decoder3d(nn.Module):
         self.head = nn.Sequential(RMS_norm(out_dim, images=False), nn.SiLU(),
                                   CausalConv3d(out_dim, 3, 3, padding=1))
 
-    def forward(self, x, feat_cache=None, feat_idx=[0]):
+    def forward(self, x, feat_cache=None, feat_idx=None):
         # conv1
+        if feat_idx is None:
+            feat_idx = []
         if feat_cache is not None:
             idx = feat_idx[0]
             cache_x = x[:, :, -CACHE_T:, :, :].clone()
@@ -493,11 +513,17 @@ class VideoVAE_(nn.Module):
     def __init__(self,
                  dim=96,
                  z_dim=16,
-                 dim_mult=[1, 2, 4, 4],
+                 dim_mult=None,
                  num_res_blocks=2,
-                 attn_scales=[],
-                 temperal_downsample=[False, True, True],
+                 attn_scales=None,
+                 temperal_downsample=None,
                  dropout=0.0):
+        if dim_mult is None:
+            dim_mult = []
+        if attn_scales is None:
+            attn_scales = []
+        if temperal_downsample is None:
+            temperal_downsample = []
         super().__init__()
         self.dim = dim
         self.z_dim = z_dim

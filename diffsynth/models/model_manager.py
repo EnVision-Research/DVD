@@ -98,16 +98,22 @@ class ModelDetectorTemplate:
     def __init__(self):
         pass
 
-    def match(self, file_path="", state_dict={}):
+    def match(self, file_path="", state_dict=None):
+        if state_dict is None:
+            state_dict = {}
         return False
     
-    def load(self, file_path="", state_dict={}, device="cuda", torch_dtype=torch.float16, **kwargs):
+    def load(self, file_path="", state_dict=None, device="cuda", torch_dtype=torch.float16, **kwargs):
+        if state_dict is None:
+            state_dict = {}
         return [], []
     
 
 
 class ModelDetectorFromSingleFile:
-    def __init__(self, model_loader_configs=[]):
+    def __init__(self, model_loader_configs=None):
+        if model_loader_configs is None:
+            model_loader_configs = []
         self.keys_hash_with_shape_dict = {}
         self.keys_hash_dict = {}
         for metadata in model_loader_configs:
@@ -120,7 +126,9 @@ class ModelDetectorFromSingleFile:
             self.keys_hash_dict[keys_hash] = (model_names, model_classes, model_resource)
 
 
-    def match(self, file_path="", state_dict={}):
+    def match(self, file_path="", state_dict=None):
+        if state_dict is None:
+            state_dict = {}
         if isinstance(file_path, str) and os.path.isdir(file_path):
             return False
         if len(state_dict) == 0:
@@ -134,7 +142,9 @@ class ModelDetectorFromSingleFile:
         return False
 
 
-    def load(self, file_path="", state_dict={}, device="cuda", torch_dtype=torch.float16, **kwargs):
+    def load(self, file_path="", state_dict=None, device="cuda", torch_dtype=torch.float16, **kwargs):
+        if state_dict is None:
+            state_dict = {}
         if len(state_dict) == 0:
             state_dict = load_state_dict(file_path)
 
@@ -158,11 +168,15 @@ class ModelDetectorFromSingleFile:
 
 
 class ModelDetectorFromSplitedSingleFile(ModelDetectorFromSingleFile):
-    def __init__(self, model_loader_configs=[]):
+    def __init__(self, model_loader_configs=None):
+        if model_loader_configs is None:
+            model_loader_configs = []
         super().__init__(model_loader_configs)
 
 
-    def match(self, file_path="", state_dict={}):
+    def match(self, file_path="", state_dict=None):
+        if state_dict is None:
+            state_dict = {}
         if isinstance(file_path, str) and os.path.isdir(file_path):
             return False
         if len(state_dict) == 0:
@@ -174,8 +188,10 @@ class ModelDetectorFromSplitedSingleFile(ModelDetectorFromSingleFile):
         return False
 
 
-    def load(self, file_path="", state_dict={}, device="cuda", torch_dtype=torch.float16, **kwargs):
+    def load(self, file_path="", state_dict=None, device="cuda", torch_dtype=torch.float16, **kwargs):
         # Split the state_dict and load from each component
+        if state_dict is None:
+            state_dict = {}
         splited_state_dict = split_state_dict_with_prefix(state_dict)
         valid_state_dict = {}
         for sub_state_dict in splited_state_dict:
@@ -195,7 +211,9 @@ class ModelDetectorFromSplitedSingleFile(ModelDetectorFromSingleFile):
 
 
 class ModelDetectorFromHuggingfaceFolder:
-    def __init__(self, model_loader_configs=[]):
+    def __init__(self, model_loader_configs=None):
+        if model_loader_configs is None:
+            model_loader_configs = []
         self.architecture_dict = {}
         for metadata in model_loader_configs:
             self.add_model_metadata(*metadata)
@@ -205,7 +223,9 @@ class ModelDetectorFromHuggingfaceFolder:
         self.architecture_dict[architecture] = (huggingface_lib, model_name, redirected_architecture)
 
 
-    def match(self, file_path="", state_dict={}):
+    def match(self, file_path="", state_dict=None):
+        if state_dict is None:
+            state_dict = {}
         if not isinstance(file_path, str) or os.path.isfile(file_path):
             return False
         file_list = os.listdir(file_path)
@@ -218,7 +238,9 @@ class ModelDetectorFromHuggingfaceFolder:
         return True
 
 
-    def load(self, file_path="", state_dict={}, device="cuda", torch_dtype=torch.float16, **kwargs):
+    def load(self, file_path="", state_dict=None, device="cuda", torch_dtype=torch.float16, **kwargs):
+        if state_dict is None:
+            state_dict = {}
         with open(os.path.join(file_path, "config.json"), "r") as f:
             config = json.load(f)
         loaded_model_names, loaded_models = [], []
@@ -236,7 +258,9 @@ class ModelDetectorFromHuggingfaceFolder:
 
 
 class ModelDetectorFromPatchedSingleFile:
-    def __init__(self, model_loader_configs=[]):
+    def __init__(self, model_loader_configs=None):
+        if model_loader_configs is None:
+            model_loader_configs = []
         self.keys_hash_with_shape_dict = {}
         for metadata in model_loader_configs:
             self.add_model_metadata(*metadata)
@@ -246,7 +270,9 @@ class ModelDetectorFromPatchedSingleFile:
         self.keys_hash_with_shape_dict[keys_hash_with_shape] = (model_name, model_class, extra_kwargs)
 
 
-    def match(self, file_path="", state_dict={}):
+    def match(self, file_path="", state_dict=None):
+        if state_dict is None:
+            state_dict = {}
         if not isinstance(file_path, str) or os.path.isdir(file_path):
             return False
         if len(state_dict) == 0:
@@ -257,7 +283,9 @@ class ModelDetectorFromPatchedSingleFile:
         return False
 
 
-    def load(self, file_path="", state_dict={}, device="cuda", torch_dtype=torch.float16, model_manager=None, **kwargs):
+    def load(self, file_path="", state_dict=None, device="cuda", torch_dtype=torch.float16, model_manager=None, **kwargs):
+        if state_dict is None:
+            state_dict = {}
         if len(state_dict) == 0:
             state_dict = load_state_dict(file_path)
 
@@ -279,10 +307,16 @@ class ModelManager:
         self,
         torch_dtype=torch.float16,
         device="cuda",
-        model_id_list: List[Preset_model_id] = [],
-        downloading_priority: List[Preset_model_website] = [ "HuggingFace","ModelScope"],
-        file_path_list: List[str] = [],
+        model_id_list: List[Preset_model_id] = None,
+        downloading_priority: List[Preset_model_website] = None,
+        file_path_list: List[str] = None,
     ):
+        if model_id_list is None:
+            model_id_list = []
+        if downloading_priority is None:
+            downloading_priority = []
+        if file_path_list is None:
+            file_path_list = []
         self.torch_dtype = torch_dtype
         self.device = device
         self.model = []
@@ -298,8 +332,14 @@ class ModelManager:
         self.load_models(downloaded_files + file_path_list)
 
 
-    def load_model_from_single_file(self, file_path="", state_dict={}, model_names=[], model_classes=[], model_resource=None):
+    def load_model_from_single_file(self, file_path="", state_dict=None, model_names=None, model_classes=None, model_resource=None):
         # print(f"Loading models from file: {file_path}")
+        if state_dict is None:
+            state_dict = {}
+        if model_names is None:
+            model_names = []
+        if model_classes is None:
+            model_classes = []
         if len(state_dict) == 0:
             state_dict = load_state_dict(file_path)
         model_names, models = load_model_from_single_file(state_dict, model_names, model_classes, model_resource, self.torch_dtype, self.device)
@@ -310,8 +350,12 @@ class ModelManager:
         print(f"    The following models are loaded: {model_names}.")
 
 
-    def load_model_from_huggingface_folder(self, file_path="", model_names=[], model_classes=[]):
+    def load_model_from_huggingface_folder(self, file_path="", model_names=None, model_classes=None):
         # print(f"Loading models from folder: {file_path}")
+        if model_names is None:
+            model_names = []
+        if model_classes is None:
+            model_classes = []
         model_names, models = load_model_from_huggingface_folder(file_path, model_names, model_classes, self.torch_dtype, self.device)
         for model_name, model in zip(model_names, models):
             self.model.append(model)
@@ -320,7 +364,15 @@ class ModelManager:
         print(f"    The following models are loaded: {model_names}.")
 
 
-    def load_patch_model_from_single_file(self, file_path="", state_dict={}, model_names=[], model_classes=[], extra_kwargs={}):
+    def load_patch_model_from_single_file(self, file_path="", state_dict=None, model_names=None, model_classes=None, extra_kwargs=None):
+        if state_dict is None:
+            state_dict = {}
+        if model_names is None:
+            model_names = []
+        if model_classes is None:
+            model_classes = []
+        if extra_kwargs is None:
+            extra_kwargs = {}
         print(f"Loading patch models from file: {file_path}")
         model_names, models = load_patch_model_from_single_file(
             state_dict, model_names, model_classes, extra_kwargs, self, self.torch_dtype, self.device)
@@ -331,7 +383,9 @@ class ModelManager:
         print(f"    The following patched models are loaded: {model_names}.")
 
 
-    def load_lora(self, file_path="", state_dict={}, lora_alpha=1.0):
+    def load_lora(self, file_path="", state_dict=None, lora_alpha=1.0):
+        if state_dict is None:
+            state_dict = {}
         if isinstance(file_path, list):
             for file_path_ in file_path:
                 self.load_lora(file_path_, state_dict=state_dict, lora_alpha=lora_alpha)
