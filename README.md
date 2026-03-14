@@ -146,6 +146,7 @@ If you encounter issues during installation, it may be caused by the packages we
 We provide an interactive Gradio interface for you to easily test DVD on your own videos without writing any code.
 
 **1. Online Demo:** The easiest way to experience DVD! Try it out directly on our [Hugging Face](https://huggingface.co/spaces/haodongli/DVD).
+> **⚠️ Note on Online Demo:** Due to GPU resource constraints on Hugging Face, the online web demo is currently limited to processing videos of up to **5 seconds**. To process longer videos, we highly recommend running the local deployment below!
 
 **2. Local Deployment:**
 If you prefer to run the UI locally, ensure your environment is set up and simply execute:
