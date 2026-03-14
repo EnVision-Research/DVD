@@ -38,7 +38,7 @@ def fn(input_video):
     ))
     output_video = save_results(depth, origin_fps, Namespace(
         input_video=input_video,
-        output_dir=REPO_ROOT,
+        output_dir=GRADIO_TMP,
         grayscale=False
     ))
 
