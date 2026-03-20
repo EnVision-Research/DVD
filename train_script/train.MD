@@ -77,7 +77,7 @@ You might also alter the files under `train_config/accelerate_config` to change 
 
 
 ---
-## 4. 📊  Checkpoints
+## 5. 📊  Checkpoints
 
 
 ### Resuming from a Checkpoint
