@@ -64,7 +64,7 @@ We provide the official pre-trained weights for **DVD**, designed for robust, ze
 | Model Version | Backbone | Description | Download |
 | :--- | :--- | :--- | :---: |
 | **DVD v1.0** | Wan2.1 | Our default model achieving SoTA performance with unprecedented structural fidelity. | [🤗 Hugging Face](https://huggingface.co/FayeHongfeiZhang/DVD/tree/main) |
-| **DVD v1.1** | - | *Performance optimizations & refined temporal consistency.* | *⏳ Coming soon* |
+| **DVD v1.1** | Wan2.1 | Performance optimizations & refined temporal consistency. Robust to reflective surface |[🤗 Hugging Face](https://huggingface.co/FayeHongfeiZhang/DVD/blob/main/dvd_1.1.safetensors) |
 
 ---
 
