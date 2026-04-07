@@ -46,7 +46,7 @@ By cleanly stripping away generative stochasticity, DVD unites the profound sema
 ---
 
 ## 📢 News
-- **[2026.04.07]** 🔥 DVD v1.1 is out! It's now more robust to reflective surfaces and better temporal consistency!
+- **[2026.04.07]** 🔥 DVD v1.1 is out! It's now more robust to reflective surfaces and has better temporal consistency!
 ---
 
 https://github.com/user-attachments/assets/2b69685a-b857-4f4a-a896-dafc6460542e
